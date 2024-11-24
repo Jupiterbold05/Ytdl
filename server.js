@@ -1,12 +1,21 @@
 const express = require('express');
 const ytdl = require('ytdl-core');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors()); // Enable CORS
 app.use(express.json());
+
+// Serve static files (e.g., index.html in the public folder)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Default route for the root URL
+app.get('/', (req, res) => {
+    res.send('Welcome to the YouTube Downloader API! Use the /download endpoint to download videos.');
+});
 
 // Endpoint for downloading YouTube videos
 app.get('/download', async (req, res) => {
@@ -28,6 +37,7 @@ app.get('/download', async (req, res) => {
     }
 });
 
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
