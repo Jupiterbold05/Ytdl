@@ -31,8 +31,17 @@ app.get('/download', async (req, res) => {
 
         res.header('Content-Disposition', `attachment; filename="${title}.mp4"`);
 
-        ytdl(url, { format: 'mp4' }).pipe(res);
+        ytdl(url, { format: 'mp4' })
+            .on('response', (response) => {
+                // Check for 410 error response and handle it
+                if (response.statusCode === 410) {
+                    console.error(`Error: Video is no longer available for download (Status 410) - URL: ${url}`);
+                    res.status(410).json({ error: 'This video is no longer available for download.' });
+                }
+            })
+            .pipe(res);
     } catch (error) {
+        console.error(`Error downloading video - URL: ${url}, Error: ${error.message}`);
         res.status(500).json({ error: 'Error downloading video', details: error.message });
     }
 });
